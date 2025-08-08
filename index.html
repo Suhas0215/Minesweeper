@@ -2,13 +2,13 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>FuseFinder</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Oilfield Ops — Avoid the Spill</title>
   <style>
     :root{
-      /* Light (default) — white UI */
+      /* Light (default) — stable light blue */
       --bg:#f6f8ff; --panel:#ffffff; --panel-2:#f1f5ff; --text:#0f172a; --muted:#64748b;
-      --accent:#2563eb; --accent-2:#7c3aed; --danger:#dc2626; --ok:#16a34a; --warning:#f59e0b;
+      --accent:#2563eb; --accent-2:#7c3aed; --danger:#1f2937; --ok:#16a34a; --warning:#f59e0b;
       --cell-unrevealed:#e7ecff; --cell-unrevealed-top:#eef2ff; --cell-revealed:#ffffff; --cell-revealed-edge:#c7d2fe; --cell-flag:#fff7cc;
       --grid-gap:4px;
     }
@@ -18,10 +18,9 @@
       --cell-unrevealed:#0a0f22; --cell-unrevealed-top:#0f1a39; --cell-revealed:#22315f; --cell-revealed-edge:#38539d; --cell-flag:#1c2a58;
     }
     body.theme-colorful{
-      /* Base values; a single random color is applied to the whole board each game via JS */
+      /* JS will set tile colors per game (single hue for all tiles) */
       --bg:#fff7fb; --panel:#ffffff; --panel-2:#fff0f5; --text:#111827; --muted:#6b7280;
       --accent:#e11d48; --accent-2:#7c3aed; --danger:#ef4444; --ok:#10b981; --warning:#f59e0b;
-      /* cell vars are overwritten per game */
     }
 
     *{box-sizing:border-box}
@@ -96,7 +95,7 @@
   <div class="app card">
     <div class="header">
       <div class="left">
-        <div class="brand-chip">FuseFinder<span class="sub">Logic Mines</span></div>
+        <div class="brand-chip">Oilfield Ops<span class="sub">Avoid the Spill</span></div>
         <div class="modes" role="tablist" aria-label="Difficulty">
           <button class="seg-btn mode-btn" role="tab" data-mode="beginner" aria-pressed="true">
             <span class="title">Beginner</span>
@@ -119,7 +118,7 @@
           <button class="seg-btn theme-btn" data-theme="colorful" aria-pressed="false">Color</button>
         </div>
         <div class="stats">
-          <div class="stat"><div class="label">Mines</div><div id="mineCount" class="value">000</div></div>
+          <div class="stat"><div class="label">Oil</div><div id="mineCount" class="value">000</div></div>
           <div class="stat"><div class="label">Flags</div><div id="flagsLeft" class="value">000</div></div>
           <div class="stat"><div class="label">Time</div><div id="time" class="value">000</div></div>
         </div>
@@ -133,8 +132,8 @@
 
     <div id="resultModal" class="modal-backdrop" role="dialog" aria-modal="true">
       <div class="modal">
-        <h3 id="modalTitle">Game Over</h3>
-        <p id="modalText">You hit a mine.</p>
+        <h3 id="modalTitle">Field Lost</h3>
+        <p id="modalText">Avoid the oil. If you strike it, you’ll be invaded by USA.</p>
         <div class="actions">
           <button id="btnAgain" class="button">Play again</button>
           <button id="btnChange" class="button">Change difficulty</button>
@@ -142,7 +141,7 @@
       </div>
     </div>
 
-    <div class="footer">Left-click to reveal • Right-click to flag • Boards are generated to be solvable by logic (no guesses)</div>
+    <div class="footer">Left-click to reveal • Right-click to flag • Fields are generated to be solvable by logic (no guesses) • Avoid the oil or risk being invaded by USA</div>
   </div>
 
   <script>
@@ -151,13 +150,13 @@
     const els = (sel) => Array.from(document.querySelectorAll(sel));
     const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
 
-    // ------- icons -------
+    // ------- icons (oil drop & flag) -------
     const Icon = {
       mine: () => `
         <svg viewBox="0 0 24 24" aria-hidden="true">
-          <g fill="none" stroke="${getComputedStyle(document.documentElement).getPropertyValue('--danger').trim()}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="5"/>
-            <path d="M12 2v4M12 18v4M2 12h4M18 12h4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8"/>
+          <g fill="none" stroke="${getComputedStyle(document.documentElement).getPropertyValue('--danger').trim()}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3C12 3 6 9 6 12.5A6 6 0 0 0 18 12.5C18 9 12 3 12 3Z" fill="${getComputedStyle(document.documentElement).getPropertyValue('--danger').trim()}22"/>
+            <path d="M8.5 13.5a3.5 3.5 0 1 0 7 0"/>
           </g>
         </svg>` ,
       flag: () => `
@@ -209,7 +208,7 @@
     }
 
     // ------- game -------
-    class Minesweeper {
+    class OilfieldOps {
       constructor(boardEl){
         this.boardEl = boardEl;
         this.timer = null; this.time = 0;
@@ -226,7 +225,6 @@
         window.scrollTo(0, y);
       }
       _buildEmpty(){
-        // Build an h x w grid of cells
         this.cells = Array.from({length:this.h}, () => Array.from({length:this.w}, () => ({ mine:false, adj:0, revealed:false, flagged:false })));
       }
       _placeMinesNoGuess(excludeX, excludeY){
@@ -289,12 +287,12 @@
         const sizePx = this._cellSize();
         this.boardEl.style.gridTemplateColumns = `repeat(${this.w}, ${sizePx}px)`;
         this.boardEl.innerHTML = '';
-        // Create exactly w*h cells
         for(let y=0;y<this.h;y++){
           for(let x=0;x<this.w;x++){
             const div = document.createElement('div');
             div.className = 'cell hidden';
             div.dataset.x = String(x); div.dataset.y = String(y);
+            // Arrow fns preserve instance 'this'
             div.addEventListener('click', (e)=> this._onLeftClick(e, x, y));
             div.addEventListener('contextmenu', (e)=> this._onRightClick(e, x, y));
             this.boardEl.appendChild(div);
@@ -310,13 +308,16 @@
       _inBounds(x,y){ return x>=0 && x<this.w && y>=0 && y<this.h; }
       _onLeftClick(e, x, y){
         if(this.ended) return;
-        if(!this._inBounds(x,y)) return; // safety
+        if(!this._inBounds(x,y)) return;
         const cell = this.cells[y] && this.cells[y][x];
-        if(!cell) return; // grid not ready yet
+        if(!cell) return;
         if(cell.flagged || cell.revealed) return;
         if(this.firstReveal){ this._placeMines(x,y); this.firstReveal = false; this._startTimer(); }
-        if(cell.mine){ this._revealAll(); this.ended = true; this._stopTimer(); this._draw(); this._showModal('Game over', 'A mine was triggered.'); return; }
-        this._reveal(x,y); this._draw(); if(this._checkWin()){ this.ended = true; this._stopTimer(); this._showModal('Cleared', `Board cleared in ${this.time}s.`); }
+        if(cell.mine){ this._revealAll(); this.ended = true; this._stopTimer(); this._draw(); this._showModal('Field Lost', 'You struck oil — you are invaded by USA.'); return; }
+        this._reveal(x,y); this._draw();
+        if(this._checkWin()){
+          this.ended = true; this._stopTimer(); fireConfetti(1800, 140); this._showModal('Field Secured', `No oil struck. Secured in ${this.time}s.`);
+        }
       }
       _onRightClick(e, x, y){ e.preventDefault(); if(this.ended) return; if(!this._inBounds(x,y)) return; const cell = this.cells[y] && this.cells[y][x]; if(!cell || cell.revealed) return; cell.flagged = !cell.flagged; this._updateCounts(); this._drawCell(x,y); }
       _reveal(x,y){
@@ -344,7 +345,7 @@
       _draw(){ for(let y=0;y<this.h;y++){ for(let x=0;x<this.w;x++) this._drawCell(x,y); } }
       _drawCell(x,y){
         const idx = y*this.w + x; const div = this.boardEl.children[idx];
-        if(!div) return; // safety against mismatched DOM/grid
+        if(!div) return;
         const c = this.cells[y][x];
         div.className = 'cell ' + (c.revealed ? 'revealed' : 'hidden') + (c.flagged ? ' flagged' : '') + (c.mine && c.revealed ? ' mine' : '');
         if(c.revealed){
@@ -359,7 +360,7 @@
     }
 
     const board = el('#board');
-    const game = new Minesweeper(board);
+    const game = new OilfieldOps(board);
 
     const MODE_CONFIG = {
       beginner: {w:8,h:8,mines:10},
@@ -372,6 +373,8 @@
       if(!cfg){ console.error('Unknown mode', mode); return; }
       const y = window.scrollY;
       els('.mode-btn').forEach(b=> b.setAttribute('aria-pressed', String(b.dataset.mode===mode)) );
+      // Re-roll color on difficulty change if in Color mode
+      if(document.body.classList.contains('theme-colorful')) { randomizeColorfulPalette(); }
       game.newGame(cfg);
       window.scrollTo(0, y);
     }
@@ -391,20 +394,38 @@
       root.setProperty('--cell-unrevealed', hsl(panelTint, 95, 92));
       root.setProperty('--cell-unrevealed-top', hsl(panelTint, 100, 96));
       root.setProperty('--cell-revealed-edge', hsl(panelTint, 60, 70));
-      // Tweak number colors slightly to match
+      root.setProperty('--panel-2', hsl(panelTint, 60, 96));
+      // Numbers match the palette a bit
       root.setProperty('--n1', hsl((base+0)%360, 70, 40));
       root.setProperty('--n2', hsl((base+100)%360, 60, 38));
       root.setProperty('--n3', hsl((base+200)%360, 65, 40));
       root.setProperty('--n4', hsl((base+280)%360, 55, 45));
     }
 
+    function setLightPalette(){
+      const root = document.documentElement.style;
+      root.setProperty('--cell-unrevealed', '#e7ecff');
+      root.setProperty('--cell-unrevealed-top', '#eef2ff');
+      root.setProperty('--cell-revealed-edge', '#c7d2fe');
+      root.setProperty('--panel-2', '#f1f5ff');
+      root.setProperty('--n1', '#2563eb');
+      root.setProperty('--n2', '#16a34a');
+      root.setProperty('--n3', '#dc2626');
+      root.setProperty('--n4', '#7c3aed');
+    }
+
     function applyTheme(theme){
       document.body.classList.remove('theme-light','theme-dark','theme-colorful');
-      if(theme==='dark') document.body.classList.add('theme-dark');
-      else if(theme==='colorful') { document.body.classList.add('theme-colorful'); randomizeColorfulPalette(); }
-      else document.body.classList.add('theme-light');
+      if(theme==='dark'){
+        document.body.classList.add('theme-dark');
+      } else if(theme==='colorful') {
+        document.body.classList.add('theme-colorful');
+        randomizeColorfulPalette();
+      } else {
+        document.body.classList.add('theme-light');
+        setLightPalette();
+      }
       els('.theme-btn').forEach(b=> b.setAttribute('aria-pressed', String(b.dataset.theme===theme)) );
-      // Redraw with current palette
       if(game && game._draw) game._draw();
     }
 
@@ -421,26 +442,70 @@
     el('#btnChange').addEventListener('click', ()=>{ game._hideModal(); });
     window.addEventListener('resize', ()=> game._render());
 
+    // --- modal: close on backdrop click & Esc ---
+    const __modalBackdrop = document.querySelector('#resultModal');
+    if(__modalBackdrop){ __modalBackdrop.addEventListener('click', (e)=>{ if(e.target === __modalBackdrop) game._hideModal(); }); }
+    window.addEventListener('keydown', (e)=>{ if(e.key === 'Escape' && __modalBackdrop && __modalBackdrop.style.display === 'flex') game._hideModal(); });
+
+    // --- simple confetti ---
+    function fireConfetti(duration=1500, count=120){
+      try{
+        const canvas = document.createElement('canvas');
+        canvas.className = 'confetti-canvas';
+        Object.assign(canvas.style,{position:'fixed',inset:'0',pointerEvents:'none',zIndex:9999});
+        document.body.appendChild(canvas);
+        const ctx = canvas.getContext('2d');
+        let W = canvas.width = window.innerWidth;
+        let H = canvas.height = window.innerHeight;
+        const parts = Array.from({length:count}, ()=>({
+          x: Math.random()*W,
+          y: -20 - Math.random()*H,
+          r: 3 + Math.random()*4,
+          vx: -1 + Math.random()*2,
+          vy: 2 + Math.random()*3,
+          color: `hsl(${Math.random()*360} 80% 60%)`
+        }));
+        let start=null;
+        function tick(ts){
+          if(!start) start = ts;
+          const t = ts - start;
+          ctx.clearRect(0,0,W,H);
+          for(const p of parts){ p.x += p.vx; p.y += p.vy; p.vy += 0.02; ctx.fillStyle=p.color; ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fill(); }
+          if(t < duration){ requestAnimationFrame(tick); } else { canvas.remove(); }
+        }
+        requestAnimationFrame(tick);
+        const onResize = ()=>{ W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; };
+        window.addEventListener('resize', onResize, {once:true});
+      }catch(err){ console.warn('Confetti unavailable:', err); }
+    }
+
     // ------- init (Beginner + Light by default) -------
     document.addEventListener('DOMContentLoaded', ()=>{
       applyTheme('light');
       applyMode('beginner');
     });
 
-    // ------- lightweight tests (do not change existing tests; none existed) -------
+    // ------- tests (added) -------
     (function selfTests(){
-      console.groupCollapsed('FuseFinder self-tests');
+      console.groupCollapsed('Oilfield Ops self-tests');
       try{
-        // Test 1: grid size consistency => DOM cells equals w*h
+        // Test 1: DOM cells equals w*h
         applyMode('beginner');
         const cellDomCount = el('#board').children.length;
         console.assert(cellDomCount === game.w*game.h, `DOM cells (${cellDomCount}) should equal w*h (${game.w*game.h})`);
-        // Test 2: bounds safety on draw
-        const lastX = game.w-1, lastY = game.h-1;
-        game._drawCell(lastX,lastY); // should not throw
-        // Test 3: click safety out of bounds
-        game._onLeftClick(new Event('click'), -1, -1); // no throw
-        game._onRightClick(new Event('contextmenu'), 999, 999); // no throw
+        // Test 2: _showModal exists and is callable
+        console.assert(typeof game._showModal === 'function', '_showModal should be a function');
+        game._showModal('Test', 'Modal OK'); game._hideModal();
+        // Test 3: safe out-of-bounds calls
+        game._onLeftClick(new Event('click'), -1, -1);
+        game._onRightClick(new Event('contextmenu'), 999, 999);
+        // Test 4: confetti function smoke test
+        fireConfetti(100, 10);
+        // Test 5: modal closes on Esc
+        game._showModal('Test', 'Press Esc');
+        const evt = new KeyboardEvent('keydown', {key:'Escape'});
+        window.dispatchEvent(evt);
+        console.assert(el('#resultModal').style.display !== 'flex', 'Modal should close on Esc');
       }catch(e){ console.error('Self-tests failed:', e); }
       console.groupEnd();
     })();
