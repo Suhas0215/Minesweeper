@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Minesweeper+ — Modern UI</title>
+  <style>
+  /* --- THEME VARIABLES ---------------------------------------------------- */
+  :root{
+    /* Light (default) */
+    --bg:#f6f8ff; --panel:#ffffff; --panel-2:#f1f5ff; --text:#0f172a; --muted:#64748b;
+    --accent:#2563eb; --accent-2:#7c3aed; --danger:#dc2626; --ok:#16a34a; --warning:#f59e0b;
+    --cell-unrevealed:#e7ecff; --cell-unrevealed-top:#eef2ff; --cell-revealed:#ffffff; --cell-revealed-edge:#c7d2fe; --cell-flag:#fff7cc;
+    --grid-gap:4px;
+  }
+  body.theme-dark{
+    --bg:#0b1020; --panel:#0e152b; --panel-2:#121a36; --text:#e8ecf3; --muted:#93a4c1;
+    --accent:#5b7cfa; --accent-2:#7fa0ff; --danger:#ff5c6a; --ok:#37d683; --warning:#f8b84a;
+    --cell-unrevealed:#0a0f22; --cell-unrevealed-top:#0f1a39; --cell-revealed:#22315f; --cell-revealed-edge:#38539d; --cell-flag:#1c2a58;
+  }
+  body.theme-colorful{
+    /* Brighter, playful but readable */
+    --bg:#fff7fb; --panel:#ffffff; --panel-2:#fff0f5; --text:#111827; --muted:#6b7280;
+    --accent:#e11d48; --accent-2:#7c3aed; --danger:#ef4444; --ok:#10b981; --warning:#f59e0b;
+    --cell-unrevealed:#ffe8f1; --cell-unrevealed-top:#fff0f6; --cell-revealed:#ffffff; --cell-revealed-edge:#fbcfe8; --cell-flag:#fef3c7;
+  }
+
+  /* --- BASE LAYOUT -------------------------------------------------------- */
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0; background:linear-gradient(180deg, var(--panel-2), var(--bg) 60%);
+    color:var(--text); font:14px/1.35 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Arial;
+    display:flex; align-items:center; justify-content:center; padding:24px;
+  }
+  .app{width:min(1000px, 96vw);} 
+  .card{background:var(--panel); border:1px solid rgba(0,0,0,.08); border-radius:16px; padding:16px; box-shadow:0 10px 30px rgba(31,41,55,.08);}    
+
+  .header{display:flex; gap:12px; flex-wrap:wrap; align-items:center; justify-content:space-between; margin-bottom:12px}
+  .left, .right{display:flex; gap:12px; align-items:center; flex-wrap:wrap}
+  .brand-chip{display:inline-flex; align-items:center; gap:8px; background:linear-gradient(90deg, var(--panel-2), var(--panel)); padding:8px 12px; border:1px solid rgba(0,0,0,.08); border-radius:12px; font-weight:800}
+  .brand-chip .sub{font-weight:600; color:var(--muted); letter-spacing:.2px}
+
+  /* Segmented difficulty control */
+  .modes{display:flex; background:var(--panel-2); border:1px solid rgba(0,0,0,.08); border-radius:12px; padding:4px}
+  .seg-btn{appearance:none; border:0; background:transparent; padding:8px 12px; border-radius:8px; cursor:pointer; position:relative}
+  .seg-btn[aria-pressed="true"]{background:#fff; box-shadow:0 1px 0 rgba(0,0,0,.02), 0 0 0 1px rgba(0,0,0,.06) inset;}
+  .seg-btn .title{font-weight:700}
+  .seg-btn .meta{display:block; font-size:11px; color:var(--muted)}
+
+  .select, .button{background:var(--panel-2); color:var(--text); border:1px solid rgba(0,0,0,.08); border-radius:10px; padding:8px 12px; display:inline-flex; align-items:center; gap:8px;}
+  .button{cursor:pointer; user-select:none}
+  .button:active{transform:translateY(1px)}
+  .stats{display:flex; gap:10px}
+  .stat{background:#fff; padding:8px 12px; border-radius:10px; border:1px solid rgba(0,0,0,.08)}
+  .stat .label{color:var(--muted); font-size:12px}
+  .stat .value{font-weight:800; letter-spacing:.5px}
+
+  .grid-wrap{background:var(--panel); border:1px solid rgba(0,0,0,.08); border-radius:14px; padding:12px}
+  #board{display:grid; gap:var(--grid-gap); justify-content:center; touch-action:manipulation}
+
+  .cell{width:32px; height:32px; display:grid; place-items:center; font-weight:800; border-radius:8px; user-select:none; transition:transform .02s ease, background .15s ease, box-shadow .15s ease, border-color .15s ease; font-size:16px}
+  /* UNREVEALED */
+  .cell.hidden{background:linear-gradient(180deg, var(--cell-unrevealed-top), var(--cell-unrevealed)); border:1px solid var(--cell-revealed-edge); box-shadow:inset 0 2px 0 rgba(255,255,255,.9), inset 0 -2px 0 rgba(129,140,248,.25); cursor:pointer;}
+  .cell.hidden:hover{outline:2px solid rgba(124,58,237,.25)}
+  .cell.hidden:active{transform:translateY(1px)}
+  /* REVEALED */
+  .cell.revealed{background:linear-gradient(180deg, var(--cell-revealed), var(--bg)); border:1px solid var(--cell-revealed-edge); box-shadow:none; cursor:default}
+  /* States */
+  .cell.flagged{background:linear-gradient(180deg, var(--cell-flag), #fff2b3); outline:2px solid var(--warning)}
+  .cell.mine.revealed{background:linear-gradient(180deg,#ffe2e2,#ffd2d2); border-color:#fecaca}
+
+  /* Number colors */
+  .n1{color:#2563eb}
+  .n2{color:#16a34a}
+  .n3{color:#dc2626}
+  .n4{color:#7c3aed}
+  .n5{color:#b45309}
+  .n6{color:#0891b2}
+  .n7{color:#be185d}
+  .n8{color:#374151}
+
+  .footer{margin-top:10px; color:var(--muted); font-size:12px; text-align:center}
+
+  /* Modal */
+  .modal-backdrop{position:fixed; inset:0; background:rgba(15,23,42,.35); display:none; align-items:center; justify-content:center;}
+  .modal{background:#fff; border:1px solid rgba(0,0,0,.08); border-radius:16px; padding:20px; width:min(420px, 92vw); box-shadow:0 20px 60px rgba(0,0,0,.18)}
+  .modal h3{margin:0 0 8px 0; font-size:18px}
+  .modal p{margin:0 0 16px 0; color:#4b5563}
+  .modal .actions{display:flex; gap:8px; justify-content:flex-end}
+  .modal .actions .button{background:var(--panel-2)}
+
+  /* SVG icon sizing inside cells */
+  .cell svg{width:18px; height:18px; display:block}
+
+  @media (max-width:600px){ .cell{width:28px; height:28px; font-size:14px} }
+  </style>
+</head>
+<body>
+  <div class="app card">
+    <div class="header">
+      <div class="left">
+        <div class="brand-chip">Minesweeper<span class="sub">Plus</span></div>
+        <div class="modes" role="tablist" aria-label="Difficulty">
+          <button class="seg-btn mode-btn" role="tab" data-mode="beginner" aria-pressed="true">
+            <span class="title">Beginner</span>
+            <span class="meta">9×9 • 10 mines</span>
+          </button>
+          <button class="seg-btn mode-btn" role="tab" data-mode="intermediate" aria-pressed="false">
+            <span class="title">Intermediate</span>
+            <span class="meta">16×16 • 40 mines</span>
+          </button>
+          <button class="seg-btn mode-btn" role="tab" data-mode="expert" aria-pressed="false">
+            <span class="title">Expert</span>
+            <span class="meta">30×16 • 99 mines</span>
+          </button>
+        </div>
+      </div>
+      <div class="right">
+        <div class="modes" role="tablist" aria-label="Theme">
+          <button class="seg-btn theme-btn" data-theme="light" aria-pressed="true">Light</button>
+          <button class="seg-btn theme-btn" data-theme="colorful" aria-pressed="false">Colorful</button>
+          <button class="seg-btn theme-btn" data-theme="dark" aria-pressed="false">Dark</button>
+        </div>
+        <div class="stats">
+          <div class="stat"><div class="label">Mines</div><div id="mineCount" class="value">000</div></div>
+          <div class="stat"><div class="label">Flags</div><div id="flagsLeft" class="value">000</div></div>
+          <div class="stat"><div class="label">Time</div><div id="time" class="value">000</div></div>
+        </div>
+        <button id="reset" class="button">New game</button>
+      </div>
+    </div>
+
+    <div class="grid-wrap">
+      <div id="board"></div>
+    </div>
+
+    <div id="resultModal" class="modal-backdrop" role="dialog" aria-modal="true">
+      <div class="modal">
+        <h3 id="modalTitle">Game Over</h3>
+        <p id="modalText">You hit a mine.</p>
+        <div class="actions">
+          <button id="btnAgain" class="button">Play again</button>
+          <button id="btnChange" class="button">Change difficulty</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">Left-click to reveal • Right-click to flag • Boards are generated to be solvable by logic (no guesses)</div>
+  </div>
+
+  <script>
+  const el = (sel) => document.querySelector(sel);
+  const els = (sel) => Array.from(document.querySelectorAll(sel));
+  const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
+
+  // Inline SVG icons (no emojis)
+  const Icon = {
+    mine: () => `
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <g fill="none" stroke="${getComputedStyle(document.documentElement).getPropertyValue('--danger').trim()}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="5"/>
+          <path d="M12 2v4M12 18v4M2 12h4M18 12h4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8"/>
+        </g>
+      </svg>` ,
+    flag: () => `
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M6 21V4m0 0h9l-2 3 2 3H6" fill="${getComputedStyle(document.documentElement).getPropertyValue('--warning').trim()}" stroke="#b45309" stroke-width="1.5" stroke-linejoin="round"/>
+      </svg>`
+  };
+
+  // --- Deterministic logic solver (single-point rules)
+  function solveDeterministically(sim){
+    let changed = true; let progress = false;
+    while(changed){
+      changed = false;
+      for(let y=0;y<sim.h;y++){
+        for(let x=0;x<sim.w;x++){
+          const c = sim.cells[y][x];
+          if(!c.revealed || c.adj <= 0) continue;
+          let hidden=[]; let flagged=0;
+          for(let ny=Math.max(0,y-1); ny<=Math.min(sim.h-1,y+1); ny++){
+            for(let nx=Math.max(0,x-1); nx<=Math.min(sim.w-1,x+1); nx++){
+              if(nx===x && ny===y) continue;
+              const n = sim.cells[ny][nx];
+              if(!n.revealed && !n.flagged) hidden.push([nx,ny]);
+              if(n.flagged) flagged++;
+            }
+          }
+          if(flagged === c.adj && hidden.length){
+            hidden.forEach(([sx,sy])=>{ const s=sim.cells[sy][sx]; if(!s.revealed && !s.flagged){ s.revealed=true; progress=true; changed=true; }});
+          }
+          if(c.adj - flagged === hidden.length && hidden.length){
+            hidden.forEach(([fx,fy])=>{ const s=sim.cells[fy][fx]; if(!s.flagged){ s.flagged=true; progress=true; changed=true; }});
+          }
+        }
+      }
+    }
+    for(let y=0;y<sim.h;y++) for(let x=0;x<sim.w;x++){ const c = sim.cells[y][x]; if(!c.mine && !c.revealed) return {solved:false, progress}; }
+    return {solved:true, progress};
+  }
+
+  function cloneBoard(src){
+    const sim = {w:src.w,h:src.h,cells:[]};
+    for(let y=0;y<src.h;y++){
+      sim.cells[y] = [];
+      for(let x=0;x<src.w;x++){
+        const c = src.cells[y][x];
+        sim.cells[y][x] = {mine:c.mine, adj:c.adj, revealed:c.revealed, flagged:c.flagged};
+      }
+    }
+    return sim;
+  }
+
+  class Minesweeper {
+    constructor(boardEl){
+      this.boardEl = boardEl;
+      this.timer = null; this.time = 0;
+      this.firstReveal = true; this.ended = false;
+      this.cells = []; this.w = 9; this.h = 9; this.mines = 10;
+      this._bindGlobalContextMenu();
+    }
+    newGame({w,h,mines}){
+      this.w = w; this.h = h; this.mines = Math.min(mines, w*h-1);
+      this.firstReveal = true; this.ended = false; this.time = 0; this._stopTimer(); this._updateTime();
+      this._buildEmpty(); this._render(); this._updateCounts();
+    }
+    _buildEmpty(){
+      this.cells = Array.from({length:this.h}, () => Array.from({length:this.w}, () => ({ mine:false, adj:0, revealed:false, flagged:false })));
+    }
+    _placeMinesNoGuess(excludeX, excludeY){
+      const MAX_TRIES = 300;
+      for(let attempt=0; attempt<MAX_TRIES; attempt++){
+        this.cells.forEach(row=>row.forEach(c=>{c.mine=false; c.adj=0; c.revealed=false; c.flagged=false;}));
+        let placed = 0; while(placed < this.mines){
+          const x = Math.floor(Math.random()*this.w);
+          const y = Math.floor(Math.random()*this.h);
+          if ((x===excludeX && y===excludeY) || this.cells[y][x].mine) continue;
+          this.cells[y][x].mine = true; placed++;
+        }
+        for(let y=0;y<this.h;y++){
+          for(let x=0;x<this.w;x++){
+            if (this.cells[y][x].mine) { this.cells[y][x].adj = -1; continue; }
+            let c=0; this._forEachNeighbor(x,y,(nx,ny)=>{ if(this.cells[ny][nx].mine) c++; });
+            this.cells[y][x].adj = c;
+          }
+        }
+        const sim = cloneBoard(this);
+        if(sim.cells[excludeY][excludeX].mine) continue;
+        const stack=[[excludeX,excludeY]]; const visited=new Set();
+        while(stack.length){
+          const [cx,cy]=stack.pop(); const key=cx+','+cy; if(visited.has(key)) continue; visited.add(key);
+          const c=sim.cells[cy][cx]; c.revealed=true;
+          if(c.adj===0){ this._forEachNeighbor(cx,cy,(nx,ny)=>{ const n=sim.cells[ny][nx]; if(!n.revealed && !n.flagged && !n.mine) stack.push([nx,ny]); }); }
+        }
+        const res = solveDeterministically(sim);
+        if(res.solved){ return true; }
+      }
+      return false;
+    }
+    _placeMines(excludeX, excludeY){
+      if(this._placeMinesNoGuess(excludeX, excludeY)) return;
+      // Fallback (should be rare)
+      let placed = 0; const total = this.mines;
+      while(placed < total){
+        const x = Math.floor(Math.random()*this.w);
+        const y = Math.floor(Math.random()*this.h);
+        if ((x===excludeX && y===excludeY) || this.cells[y][x].mine) continue;
+        this.cells[y][x].mine = true; placed++;
+      }
+      for(let y=0;y<this.h;y++){
+        for(let x=0;x<this.w;x++){
+          if (this.cells[y][x].mine) { this.cells[y][x].adj = -1; continue; }
+          let c=0; this._forEachNeighbor(x,y,(nx,ny)=>{ if(this.cells[ny][nx].mine) c++; });
+          this.cells[y][x].adj = c;
+        }
+      }
+    }
+    _forEachNeighbor(x,y,cb){
+      for(let dy=-1; dy<=1; dy++){
+        for(let dx=-1; dx<=1; dx++){
+          if(dx===0 && dy===0) continue;
+          const nx=x+dx, ny=y+dy;
+          if(nx>=0 && nx<this.w && ny>=0 && ny<this.h) cb(nx,ny);
+        }
+      }
+    }
+    _render(){
+      const sizePx = this._cellSize();
+      this.boardEl.style.gridTemplateColumns = `repeat(${this.w}, ${sizePx}px)`;
+      this.boardEl.innerHTML = '';
+      for(let y=0;y<this.h;y++){
+        for(let x=0;x<this.w;x++){
+          const div = document.createElement('div');
+          div.className = 'cell hidden';
+          div.dataset.x = x; div.dataset.y = y;
+          div.addEventListener('click', (e)=> this._onLeftClick(e, x, y));
+          div.addEventListener('contextmenu', (e)=> this._onRightClick(e, x, y));
+          this.boardEl.appendChild(div);
+        }
+      }
+      this._draw();
+    }
+    _cellSize(){
+      const maxW = Math.min(900, window.innerWidth*0.9 - 40);
+      const cell = Math.floor(maxW / this.w) - 2;
+      return clamp(cell, 22, 38);
+    }
+    _onLeftClick(e, x, y){
+      if(this.ended) return;
+      const cell = this.cells[y][x]; if(cell.flagged || cell.revealed) return;
+      if(this.firstReveal){ this._placeMines(x,y); this.firstReveal = false; this._startTimer(); }
+      if(cell.mine){ this._revealAll(); this.ended = true; this._stopTimer(); this._draw(); this._showModal('Game over', 'A mine was triggered.'); return; }
+      this._reveal(x,y); this._draw(); if(this._checkWin()){ this.ended = true; this._stopTimer(); this._showModal('Cleared', `Board cleared in ${this.time}s.`); }
+    }
+    _onRightClick(e, x, y){ e.preventDefault(); if(this.ended) return; const cell = this.cells[y][x]; if(cell.revealed) return; cell.flagged = !cell.flagged; this._updateCounts(); this._drawCell(x,y); }
+    _reveal(x,y){
+      const stack=[[x,y]]; const visited=new Set();
+      while(stack.length){
+        const [cx,cy] = stack.pop(); const key = cx+','+cy; if(visited.has(key)) continue; visited.add(key);
+        const c = this.cells[cy][cx]; if(c.flagged || c.revealed) continue; c.revealed = true;
+        if(c.adj===0){ this._forEachNeighbor(cx,cy,(nx,ny)=>{ const n = this.cells[ny][nx]; if(!n.revealed && !n.flagged && !n.mine) stack.push([nx,ny]); }); }
+      }
+    }
+    _revealAll(){ for(let y=0;y<this.h;y++){ for(let x=0;x<this.w;x++){ this.cells[y][x].revealed = true; } } }
+    _checkWin(){ for(let y=0;y<this.h;y++){ for(let x=0;x<this.w;x++){ const c=this.cells[y][x]; if(!c.mine && !c.revealed) return false; } } return true; }
+    _updateCounts(){
+      const flagsUsed = this.cells.flat().filter(c=>c.flagged).length;
+      el('#mineCount').textContent = String(this.mines).padStart(3,'0');
+      el('#flagsLeft').textContent = String(Math.max(0, this.mines - flagsUsed)).padStart(3,'0');
+    }
+    _startTimer(){ if(this.timer) return; this.timer = setInterval(()=>{ this.time++; this._updateTime(); }, 1000); }
+    _stopTimer(){ if(this.timer){ clearInterval(this.timer); this.timer=null; } }
+    _updateTime(){ el('#time').textContent = String(this.time).padStart(3,'0'); }
+    _draw(){ for(let y=0;y<this.h;y++){ for(let x=0;x<this.w;x++) this._drawCell(x,y); } }
+    _drawCell(x,y){
+      const idx = y*this.w + x; const div = this.boardEl.children[idx]; const c = this.cells[y][x];
+      div.className = 'cell ' + (c.revealed ? 'revealed' : 'hidden') + (c.flagged ? ' flagged' : '') + (c.mine && c.revealed ? ' mine' : '');
+      if(c.revealed){
+        if(c.mine){ div.innerHTML = Icon.mine(); }
+        else if(c.adj>0){ div.textContent = c.adj; div.classList.add('n'+c.adj); }
+        else { div.textContent = ''; }
+      } else { div.innerHTML = c.flagged ? Icon.flag() : ''; }
+    }
+    _bindGlobalContextMenu(){ this.boardEl.addEventListener('contextmenu',(e)=>{ e.preventDefault(); }); }
+    _showModal(title, text){ el('#modalTitle').textContent = title; el('#modalText').textContent = text; el('#resultModal').style.display = 'flex'; }
+    _hideModal(){ el('#resultModal').style.display = 'none'; }
+  }
+
+  const board = el('#board');
+  const game = new Minesweeper(board);
+
+  const MODE_CONFIG = {
+    beginner: {w:9,h:9,mines:10},
+    intermediate: {w:16,h:16,mines:40},
+    expert: {w:30,h:16,mines:99}
+  };
+
+  function applyMode(mode){
+    els('.mode-btn').forEach(b=> b.setAttribute('aria-pressed', String(b.dataset.mode===mode)) );
+    game.newGame(MODE_CONFIG[mode]);
+  }
+
+  els('.mode-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=> applyMode(btn.dataset.mode));
+  });
+
+  // THEME HANDLING
+  function applyTheme(theme){
+    document.body.classList.remove('theme-light','theme-dark','theme-colorful');
+    if(theme==='dark') document.body.classList.add('theme-dark');
+    else if(theme==='colorful') document.body.classList.add('theme-colorful');
+    else document.body.classList.add('theme-light');
+    els('.theme-btn').forEach(b=> b.setAttribute('aria-pressed', String(b.dataset.theme===theme)) );
+    try{ localStorage.setItem('ms_theme', theme); }catch{}
+  }
+  els('.theme-btn').forEach(btn=> btn.addEventListener('click', ()=> applyTheme(btn.dataset.theme)) );
+  // restore theme
+  try{ const saved = localStorage.getItem('ms_theme'); if(saved) applyTheme(saved); else applyTheme('light'); }catch{ applyTheme('light'); }
+
+  el('#reset').addEventListener('click', ()=>{
+    const active = els('.mode-btn').find(b=>b.getAttribute('aria-pressed')==='true')?.dataset.mode || 'beginner';
+    applyMode(active);
+  });
+
+  el('#btnAgain').addEventListener('click', ()=>{ game._hideModal(); el('#reset').click(); });
+  el('#btnChange').addEventListener('click', ()=>{ game._hideModal(); });
+  window.addEventListener('resize', ()=> game._render());
+
+  // First load
+  applyMode('beginner');
+  </script>
+</body>
+</html>
