@@ -14,8 +14,8 @@ let game;
 
 const MODE_CONFIG = {
   beginner: {w:8,h:8,mines:10},
-  intermediate: {w:12,h:10,mines:22},
-  expert: {w:16,h:12,mines:40}
+  intermediate: {w:12,h:10,mines:20},
+  expert: {w:16,h:12,mines:30}
 };
 
 function applyMode(mode){
