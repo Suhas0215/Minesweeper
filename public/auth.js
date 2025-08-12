@@ -62,6 +62,8 @@ export function showGame(){
   const root = document.getElementById('gameRoot');
   if(landing) landing.style.display = 'none';
   if(root) root.hidden = false;
+  const evt = new CustomEvent('game:show');
+  window.dispatchEvent(evt);
 }
 
 function loadGisScript(){

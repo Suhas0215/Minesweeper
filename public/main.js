@@ -133,11 +133,17 @@ function initEvents(){
   el('#lbMode').addEventListener('change', refreshLeaderboard);
 }
 
+export function ensureGameVisible(){
+  const root = document.getElementById('gameRoot');
+  if(root) root.hidden = false;
+  if(!game){ game = new Minesweeper(board, { onWin: onGameWin, onLose: onGameLose }); }
+}
+
 function initLanding(){
   const btnSignin = document.getElementById('landingSignin');
   const btnSkip = document.getElementById('landingSkip');
   if(btnSignin){ btnSignin.addEventListener('click', ()=> triggerSignin()); }
-  if(btnSkip){ btnSkip.addEventListener('click', ()=> showGame()); }
+  if(btnSkip){ btnSkip.addEventListener('click', ()=> { showGame(); ensureGameVisible(); }); }
 }
 
 function initGame(){
@@ -155,3 +161,7 @@ function initGame(){
     await refreshLeaderboard();
   });
 })();
+
+window.addEventListener('game:show', ()=>{
+  ensureGameVisible();
+});

@@ -19,7 +19,7 @@
     </div>
   </div>
 
-  <div id="gameRoot" class="app card" hidden>
+  <div id="gameRoot" class="app" hidden>
     <div class="header">
       <div class="left">
         <div class="brand-chip">Minesweeper<span class="sub">Avoid the Mines</span></div>
@@ -63,8 +63,26 @@
       </div>
     </div>
 
-    <div class="grid-wrap">
-      <div id="board"></div>
+    <div class="main-layout">
+      <div class="grid-card glass card">
+        <div class="grid-wrap">
+          <div id="board"></div>
+        </div>
+      </div>
+      <aside class="sidebar glass card">
+        <section id="leaderboardCard">
+          <h3>Leaderboard</h3>
+          <div class="lb-controls">
+            <select id="lbMode">
+              <option value="beginner">Beginner</option>
+              <option value="intermediate">Intermediate</option>
+              <option value="expert">Expert</option>
+            </select>
+            <button id="btnRefreshLb" class="button">Refresh</button>
+          </div>
+          <ol id="leaderboardList" class="leaderboard"></ol>
+        </section>
+      </aside>
     </div>
 
     <div id="resultModal" class="modal-backdrop" role="dialog" aria-modal="true">
@@ -78,19 +96,6 @@
         </div>
       </div>
     </div>
-
-    <section class="card" id="leaderboardCard">
-      <h3>Leaderboard</h3>
-      <div class="lb-controls">
-        <select id="lbMode">
-          <option value="beginner">Beginner</option>
-          <option value="intermediate">Intermediate</option>
-          <option value="expert">Expert</option>
-        </select>
-        <button id="btnRefreshLb" class="button">Refresh</button>
-      </div>
-      <ol id="leaderboardList" class="leaderboard"></ol>
-    </section>
 
     <div class="footer">Left-click to reveal • Right-click to flag • Boards are generated to be solvable by logic (no guesses) • Avoid the mines</div>
 
