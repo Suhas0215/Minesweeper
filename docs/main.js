@@ -1,7 +1,7 @@
 import './polyfill.js';
-import { Minesweeper, randomizeColorfulPalette } from '../public/game.js';
-import { initAuthUI, refreshAuthUI } from '../public/auth.js';
-import { fetchLeaderboard, submitScore } from '../public/api.js';
+import { Minesweeper, randomizeColorfulPalette } from './game.js';
+import { initAuthUI, refreshAuthUI, triggerSignin } from './auth.js';
+import { fetchLeaderboard, submitScore } from './api.js';
 
 const el = (sel) => document.querySelector(sel);
 const els = (sel) => Array.from(document.querySelectorAll(sel));
@@ -138,7 +138,7 @@ function initGame(){
 function initLanding(){
   const btnSignin = document.getElementById('landingSignin');
   const btnSkip = document.getElementById('landingSkip');
-  if(btnSignin){ btnSignin.addEventListener('click', ()=> window.triggerSignin?.() || alert('Configure Google login')); }
+  if(btnSignin){ btnSignin.addEventListener('click', ()=> triggerSignin()); }
   if(btnSkip){ btnSkip.addEventListener('click', ()=> { const landing=document.getElementById('landing'); const root=document.getElementById('gameRoot'); if(landing) landing.style.display='none'; if(root) root.hidden=false; }); }
 }
 
