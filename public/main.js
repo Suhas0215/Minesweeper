@@ -18,11 +18,10 @@ const MODE_CONFIG = {
 function applyMode(mode){
   const cfg = MODE_CONFIG[mode];
   if(!cfg){ console.error('Unknown mode', mode); return; }
-  const y = window.scrollY;
   els('.mode-btn').forEach(b=> b.setAttribute('aria-pressed', String(b.dataset.mode===mode)) );
   if(document.body.classList.contains('theme-colorful')) { randomizeColorfulPalette(); }
   game.newGame(cfg);
-  window.scrollTo(0, y);
+  document.querySelector('.header')?.scrollIntoView({block:'start'});
   el('#lbMode').value = mode;
   refreshLeaderboard();
 }

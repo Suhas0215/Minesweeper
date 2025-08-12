@@ -29,8 +29,8 @@ body.theme-dark .card{background: rgba(20,28,48,.45); border-color: rgba(255,255
 @media (max-width: 1020px){ .right{justify-content:flex-start} .right > *{margin-left:0} }
 .brand-chip{display:inline-flex; align-items:center; gap:8px; background:linear-gradient(90deg, var(--panel-2), var(--panel)); padding:8px 12px; border:1px solid rgba(0,0,0,.08); border-radius:12px; font-weight:800; white-space:nowrap}
 .brand-chip .sub{font-weight:600; color:var(--muted); letter-spacing:.2px}
-.modes{display:flex; background:var(--panel-2); border:1px solid rgba(0,0,0,.08); border-radius:12px; padding:4px}
-.seg-btn{appearance:none; border:0; background:transparent; padding:6px 10px; border-radius:8px; cursor:pointer; white-space:nowrap}
+.modes{display:flex; background:var(--panel-2); border:1px solid rgba(0,0,0,.08); border-radius:999px; padding:4px; gap:4px}
+.seg-btn{appearance:none; border:0; background:transparent; padding:4px 8px; border-radius:8px; cursor:pointer; white-space:nowrap; font-size:12px}
 .seg-btn[aria-pressed="true"]{background:#fff; box-shadow:0 1px 0 rgba(0,0,0,.02), 0 0 0 1px rgba(0,0,0,.06) inset}
 .seg-btn .title{font-weight:700}
 .seg-btn .meta{display:block; font-size:11px; color:var(--muted)}
