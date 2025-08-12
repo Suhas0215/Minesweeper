@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Minesweeper — Avoid the Mines</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <div class="app card">
+    <div class="header">
+      <div class="left">
+        <div class="brand-chip">Minesweeper<span class="sub">Avoid the Mines</span></div>
+        <div class="modes" role="tablist" aria-label="Difficulty">
+          <button class="seg-btn mode-btn" role="tab" data-mode="beginner" aria-pressed="true">
+            <span class="title">Beginner</span>
+            <span class="meta">8×8 • 10</span>
+          </button>
+          <button class="seg-btn mode-btn" role="tab" data-mode="intermediate" aria-pressed="false">
+            <span class="title">Intermediate</span>
+            <span class="meta">12×10 • 22</span>
+          </button>
+          <button class="seg-btn mode-btn" role="tab" data-mode="expert" aria-pressed="false">
+            <span class="title">Expert</span>
+            <span class="meta">16×12 • 40</span>
+          </button>
+        </div>
+      </div>
+      <div class="right">
+        <div class="modes" role="tablist" aria-label="Theme">
+          <button class="seg-btn theme-btn" data-theme="light" aria-pressed="true">Light</button>
+          <button class="seg-btn theme-btn" data-theme="dark" aria-pressed="false">Dark</button>
+          <button class="seg-btn theme-btn" data-theme="colorful" aria-pressed="false">Color</button>
+        </div>
+        <div class="stats">
+          <div class="stat"><div class="label">Mines</div><div id="mineCount" class="value">000</div></div>
+          <div class="stat"><div class="label">Flags</div><div id="flagsLeft" class="value">000</div></div>
+          <div class="stat"><div class="label">Time</div><div id="time" class="value">000</div></div>
+        </div>
+        <div id="authArea" class="auth-area">
+          <div id="userInfo" class="user-info" hidden>
+            <img id="userPic" alt="" />
+            <span id="userName"></span>
+            <button id="btnLogout" class="button">Logout</button>
+          </div>
+          <div id="signinArea" class="signin-area">
+            <button id="btnSignin" class="button">Sign in with Google</button>
+          </div>
+        </div>
+        <button id="reset" class="button">New game</button>
+      </div>
+    </div>
+
+    <div class="grid-wrap">
+      <div id="board"></div>
+    </div>
+
+    <div id="resultModal" class="modal-backdrop" role="dialog" aria-modal="true">
+      <div class="modal">
+        <h3 id="modalTitle">Game Over</h3>
+        <p id="modalText">You hit a mine.</p>
+        <div class="actions">
+          <button id="btnAgain" class="button">Play again</button>
+          <button id="btnChange" class="button">Change difficulty</button>
+        </div>
+      </div>
+    </div>
+
+    <section class="card" id="leaderboardCard">
+      <h3>Leaderboard</h3>
+      <div class="lb-controls">
+        <select id="lbMode">
+          <option value="beginner">Beginner</option>
+          <option value="intermediate">Intermediate</option>
+          <option value="expert">Expert</option>
+        </select>
+        <button id="btnRefreshLb" class="button">Refresh</button>
+      </div>
+      <ol id="leaderboardList" class="leaderboard"></ol>
+    </section>
+
+    <div class="footer">Left-click to reveal • Right-click to flag • Boards are generated to be solvable by logic (no guesses) • Avoid the mines</div>
+  </div>
+
+  <script type="module" src="/main.js"></script>
+</body>
+</html>
