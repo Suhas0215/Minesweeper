@@ -135,10 +135,18 @@ function initGame(){
   game = new Minesweeper(board, { onWin: onGameWin, onLose: onGameLose });
 }
 
+function initLanding(){
+  const btnSignin = document.getElementById('landingSignin');
+  const btnSkip = document.getElementById('landingSkip');
+  if(btnSignin){ btnSignin.addEventListener('click', ()=> window.triggerSignin?.() || alert('Configure Google login')); }
+  if(btnSkip){ btnSkip.addEventListener('click', ()=> { const landing=document.getElementById('landing'); const root=document.getElementById('gameRoot'); if(landing) landing.style.display='none'; if(root) root.hidden=false; }); }
+}
+
 document.addEventListener('DOMContentLoaded', async ()=>{
   applyTheme('light');
   initGame();
   initEvents();
+  initLanding();
   await initAuthUI();
   applyMode('beginner');
   await refreshLeaderboard();

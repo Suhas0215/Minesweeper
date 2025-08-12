@@ -1,5 +1,5 @@
 import { Minesweeper, randomizeColorfulPalette } from './game.js';
-import { initAuthUI, refreshAuthUI } from './auth.js';
+import { initAuthUI, refreshAuthUI, triggerSignin, showGame } from './auth.js';
 import { fetchLeaderboard, submitScore } from './api.js';
 
 const el = (sel) => document.querySelector(sel);
@@ -133,6 +133,13 @@ function initEvents(){
   el('#lbMode').addEventListener('change', refreshLeaderboard);
 }
 
+function initLanding(){
+  const btnSignin = document.getElementById('landingSignin');
+  const btnSkip = document.getElementById('landingSkip');
+  if(btnSignin){ btnSignin.addEventListener('click', ()=> triggerSignin()); }
+  if(btnSkip){ btnSkip.addEventListener('click', ()=> showGame()); }
+}
+
 function initGame(){
   game = new Minesweeper(board, { onWin: onGameWin, onLose: onGameLose });
 }
@@ -142,6 +149,7 @@ function initGame(){
     applyTheme('light');
     initGame();
     initEvents();
+    initLanding();
     await initAuthUI();
     applyMode('beginner');
     await refreshLeaderboard();

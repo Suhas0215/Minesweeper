@@ -7,7 +7,19 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <div class="app card">
+  <div id="landing" class="landing">
+    <div class="landing-card">
+      <h1>Minesweeper</h1>
+      <p>Clear the board without detonating a mine.</p>
+      <div class="landing-actions">
+        <button id="landingSignin" class="button">Sign in with Google</button>
+        <button id="landingSkip" class="button">Play as Guest</button>
+      </div>
+      <small class="muted">You can submit scores as Guest or sign in for profile and tracked bests.</small>
+    </div>
+  </div>
+
+  <div id="gameRoot" class="app card" hidden>
     <div class="header">
       <div class="left">
         <div class="brand-chip">Minesweeper<span class="sub">Avoid the Mines</span></div>

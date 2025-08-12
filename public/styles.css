@@ -20,7 +20,7 @@ body{margin:0; background:linear-gradient(180deg, var(--panel-2), var(--bg) 60%)
      display:flex; align-items:center; justify-content:center; padding:24px; overflow-x:hidden}
 .app{width:min(1000px, 96vw); margin:0 auto}
 .card{background:var(--panel); border:1px solid rgba(0,0,0,.08); border-radius:16px; padding:16px; box-shadow:0 10px 30px rgba(31,41,55,.08); margin-bottom:14px}
-.header{display:grid; grid-template-columns:minmax(0,1fr) auto auto auto; column-gap:10px; align-items:center; position:sticky; top:0; background:var(--panel); z-index:5; padding-bottom:8px; margin-bottom:12px}
+.header{display:grid; grid-template-columns:minmax(0,1fr) auto auto auto; column-gap:10px; align-items:center; background:var(--panel); padding-bottom:8px; margin-bottom:12px}
 .left,.right{display:flex; gap:10px; align-items:center; min-width:0}
 .left{flex:1}
 .brand-chip{display:inline-flex; align-items:center; gap:8px; background:linear-gradient(90deg, var(--panel-2), var(--panel)); padding:8px 12px; border:1px solid rgba(0,0,0,.08); border-radius:12px; font-weight:800; white-space:nowrap}
@@ -66,6 +66,12 @@ body{margin:0; background:linear-gradient(180deg, var(--panel-2), var(--bg) 60%)
 .leaderboard{list-style:decimal; padding-left:18px}
 .leaderboard li{display:flex; justify-content:space-between; gap:10px; padding:6px 8px; border-bottom:1px solid rgba(0,0,0,.06)}
 .lb-controls{display:flex; gap:8px; align-items:center; margin-bottom:8px}
+.landing{position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background:linear-gradient(180deg, var(--panel-2), var(--bg) 60%)}
+.landing-card{background:var(--panel); border:1px solid rgba(0,0,0,.08); border-radius:16px; padding:24px; width:min(520px, 92vw); text-align:center; box-shadow:0 10px 30px rgba(31,41,55,.08)}
+.landing-card h1{margin:0 0 8px 0}
+.landing-card p{margin:0 0 14px 0; color:var(--muted)}
+.landing-actions{display:flex; gap:10px; justify-content:center; margin-bottom:10px}
+.muted{color:var(--muted)}
 @media (max-width:900px){ .brand-chip{display:none} }
 @media (max-width:760px){ .stats .label{display:none} .seg-btn{padding:4px 6px} .seg-btn .meta{display:none} }
 @media (max-width:620px){ .seg-btn .title{font-size:12px} #reset{padding:6px 8px; font-size:12px} }
