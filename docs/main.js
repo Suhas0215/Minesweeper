@@ -3,6 +3,9 @@ import { Minesweeper, randomizeColorfulPalette } from './game.js';
 import { initAuthUI, refreshAuthUI, triggerSignin } from './auth.js';
 import { fetchLeaderboard, submitScore } from './api.js';
 
+const MODES = ['beginner','intermediate','expert'];
+const THEMES = ['light','dark','colorful'];
+
 const el = (sel) => document.querySelector(sel);
 const els = (sel) => Array.from(document.querySelectorAll(sel));
 
@@ -18,13 +21,48 @@ const MODE_CONFIG = {
 function applyMode(mode){
   const cfg = MODE_CONFIG[mode];
   if(!cfg){ console.error('Unknown mode', mode); return; }
-  const y = window.scrollY;
-  els('.mode-btn').forEach(b=> b.setAttribute('aria-pressed', String(b.dataset.mode===mode)) );
   if(document.body.classList.contains('theme-colorful')) { randomizeColorfulPalette(); }
   game.newGame(cfg);
-  window.scrollTo(0, y);
+  document.querySelector('.header')?.scrollIntoView({block:'start'});
   document.querySelector('#lbMode').value = mode;
+  const btn = document.querySelector('#modeToggle'); if(btn){
+    const names = {beginner:'Beginner', intermediate:'Intermediate', expert:'Expert'};
+    btn.textContent = names[mode] || mode;
+  }
   refreshLeaderboard();
+}
+
+function getActiveMode(){
+  const toggle = document.querySelector('#modeToggle');
+  if(toggle){
+    const text = toggle.textContent?.toLowerCase();
+    if(text?.includes('beginner')) return 'beginner';
+    if(text?.includes('intermediate')) return 'intermediate';
+    if(text?.includes('expert')) return 'expert';
+  }
+  return 'beginner';
+}
+
+function initToggleControls(){
+  const modeBtn = document.querySelector('#modeToggle');
+  if(modeBtn){
+    modeBtn.addEventListener('click', ()=>{
+      const current = getActiveMode();
+      const idx = MODES.indexOf(current);
+      const next = MODES[(idx+1)%MODES.length] || 'beginner';
+      applyMode(next);
+    });
+  }
+  const themeBtn = document.querySelector('#themeToggle');
+  if(themeBtn){
+    themeBtn.addEventListener('click', ()=>{
+      const current = document.body.classList.contains('theme-dark') ? 'dark' : (document.body.classList.contains('theme-colorful') ? 'colorful' : 'light');
+      const idx = THEMES.indexOf(current);
+      const next = THEMES[(idx+1)%THEMES.length] || 'light';
+      applyTheme(next);
+      themeBtn.textContent = next.charAt(0).toUpperCase()+next.slice(1);
+    });
+  }
 }
 
 function setLightPalette(){
@@ -50,7 +88,7 @@ function applyTheme(theme){
     document.body.classList.add('theme-light');
     setLightPalette();
   }
-  els('.theme-btn').forEach(b=> b.setAttribute('aria-pressed', String(b.dataset.theme===theme)) );
+  const themeBtn = document.querySelector('#themeToggle'); if(themeBtn){ themeBtn.textContent = theme.charAt(0).toUpperCase()+theme.slice(1); }
   if(game && game._draw) game._draw();
 }
 
@@ -126,9 +164,7 @@ async function refreshLeaderboard(){
 }
 
 function initEvents(){
-  els('.mode-btn').forEach(btn=>{ btn.addEventListener('click', ()=> applyMode(btn.dataset.mode)); });
-  els('.theme-btn').forEach(btn=> btn.addEventListener('click', ()=> applyTheme(btn.dataset.theme)) );
-  document.querySelector('#reset').addEventListener('click', ()=>{ const y = window.scrollY; applyMode(els('.mode-btn').find(b=>b.getAttribute('aria-pressed')==='true')?.dataset.mode || 'beginner'); window.scrollTo(0, y); });
+  document.querySelector('#reset').addEventListener('click', ()=>{ const y = window.scrollY; applyMode(getActiveMode()); window.scrollTo(0, y); });
   document.querySelector('#btnAgain').addEventListener('click', ()=>{ hideModal(); document.querySelector('#reset').click(); });
   document.querySelector('#btnChange').addEventListener('click', ()=>{ hideModal(); });
   window.addEventListener('resize', ()=> game._render());
@@ -154,6 +190,7 @@ document.addEventListener('DOMContentLoaded', async ()=>{
   applyTheme('light');
   initGame();
   initEvents();
+  initToggleControls();
   initLanding();
   await initAuthUI();
   applyMode('beginner');

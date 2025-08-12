@@ -24,25 +24,12 @@
       <div class="left">
         <div class="brand-chip">Minesweeper<span class="sub">Avoid the Mines</span></div>
         <div class="modes modes-difficulty" role="tablist" aria-label="Difficulty">
-          <button class="seg-btn mode-btn" role="tab" data-mode="beginner" aria-pressed="true">
-            <span class="title">Beginner</span>
-            <span class="meta">8×8 • 10</span>
-          </button>
-          <button class="seg-btn mode-btn" role="tab" data-mode="intermediate" aria-pressed="false">
-            <span class="title">Intermediate</span>
-            <span class="meta">12×10 • 22</span>
-          </button>
-          <button class="seg-btn mode-btn" role="tab" data-mode="expert" aria-pressed="false">
-            <span class="title">Expert</span>
-            <span class="meta">16×12 • 40</span>
-          </button>
+          <button id="modeToggle" class="button toggle" aria-label="Cycle difficulty">Beginner</button>
         </div>
       </div>
       <div class="right">
         <div class="modes" role="tablist" aria-label="Theme">
-          <button class="seg-btn theme-btn" data-theme="light" aria-pressed="true">Light</button>
-          <button class="seg-btn theme-btn" data-theme="dark" aria-pressed="false">Dark</button>
-          <button class="seg-btn theme-btn" data-theme="colorful" aria-pressed="false">Color</button>
+          <button id="themeToggle" class="button toggle" aria-label="Cycle theme">Light</button>
         </div>
         <div class="stats">
           <div class="stat"><div class="label">Mines</div><div id="mineCount" class="value">000</div></div>

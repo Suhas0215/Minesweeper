@@ -15,14 +15,20 @@ const MODE_CONFIG = {
   expert: {w:16,h:12,mines:40}
 };
 
+const MODES = ['beginner','intermediate','expert'];
+const THEMES = ['light','dark','colorful'];
+
 function applyMode(mode){
   const cfg = MODE_CONFIG[mode];
   if(!cfg){ console.error('Unknown mode', mode); return; }
-  els('.mode-btn').forEach(b=> b.setAttribute('aria-pressed', String(b.dataset.mode===mode)) );
   if(document.body.classList.contains('theme-colorful')) { randomizeColorfulPalette(); }
   game.newGame(cfg);
   document.querySelector('.header')?.scrollIntoView({block:'start'});
   el('#lbMode').value = mode;
+  const btn = el('#modeToggle'); if(btn){
+    const names = {beginner:'Beginner', intermediate:'Intermediate', expert:'Expert'};
+    btn.textContent = names[mode] || mode;
+  }
   refreshLeaderboard();
 }
 
@@ -49,7 +55,7 @@ function applyTheme(theme){
     document.body.classList.add('theme-light');
     setLightPalette();
   }
-  els('.theme-btn').forEach(b=> b.setAttribute('aria-pressed', String(b.dataset.theme===theme)) );
+  const themeBtn = el('#themeToggle'); if(themeBtn){ themeBtn.textContent = theme.charAt(0).toUpperCase()+theme.slice(1); }
   if(game && game._draw) game._draw();
 }
 
@@ -101,7 +107,16 @@ async function onGameWin({ time, w, h, mines }){
 
 function onGameLose(){ showModal('Game Over', 'You hit a mine.'); }
 
-function getActiveMode(){ return els('.mode-btn').find(b=>b.getAttribute('aria-pressed')==='true')?.dataset.mode || 'beginner'; }
+function getActiveMode(){
+  const toggle = el('#modeToggle');
+  if(toggle){
+    const text = toggle.textContent?.toLowerCase();
+    if(text?.includes('beginner')) return 'beginner';
+    if(text?.includes('intermediate')) return 'intermediate';
+    if(text?.includes('expert')) return 'expert';
+  }
+  return 'beginner';
+}
 
 async function refreshLeaderboard(){
   const mode = el('#lbMode').value;
@@ -126,9 +141,30 @@ async function refreshLeaderboard(){
   }
 }
 
+function initToggleControls(){
+  const modeBtn = el('#modeToggle');
+  if(modeBtn){
+    modeBtn.addEventListener('click', ()=>{
+      const current = getActiveMode();
+      const idx = MODES.indexOf(current);
+      const next = MODES[(idx+1)%MODES.length] || 'beginner';
+      applyMode(next);
+    });
+  }
+  const themeBtn = el('#themeToggle');
+  if(themeBtn){
+    themeBtn.addEventListener('click', ()=>{
+      const current = document.body.classList.contains('theme-dark') ? 'dark' : (document.body.classList.contains('theme-colorful') ? 'colorful' : 'light');
+      const idx = THEMES.indexOf(current);
+      const next = THEMES[(idx+1)%THEMES.length] || 'light';
+      applyTheme(next);
+      themeBtn.textContent = next.charAt(0).toUpperCase()+next.slice(1);
+    });
+  }
+}
+
 function initEvents(){
-  els('.mode-btn').forEach(btn=>{ btn.addEventListener('click', ()=> applyMode(btn.dataset.mode)); });
-  els('.theme-btn').forEach(btn=> btn.addEventListener('click', ()=> applyTheme(btn.dataset.theme)) );
+  // remove segmented control listeners
   el('#reset').addEventListener('click', ()=>{ const y = window.scrollY; applyMode(getActiveMode()); window.scrollTo(0, y); });
   el('#btnAgain').addEventListener('click', ()=>{ hideModal(); el('#reset').click(); });
   el('#btnChange').addEventListener('click', ()=>{ hideModal(); });
@@ -162,6 +198,7 @@ function initGame(){
     applyTheme('light');
     initGame();
     initEvents();
+    initToggleControls();
     initLanding();
     await initAuthUI();
     applyMode('beginner');

@@ -86,9 +86,8 @@ body.theme-dark .button{background:rgba(255,255,255,.08)}
 @media (max-width:600px){ .cell{width:28px; height:28px; font-size:14px} }
 .spotlight{display:flex; align-items:center; justify-content:space-between; gap:10px; padding:12px 14px; font-weight:600}
 .spotlight .meta{color:var(--muted); font-weight:500}
-.modes-difficulty{display:flex; flex-wrap:nowrap; white-space:nowrap; overflow:auto; max-width:100%;}
-.modes-difficulty .seg-btn{flex:0 0 auto}
-@media (max-width: 520px){ .modes-difficulty{flex-wrap:wrap; white-space:normal} }
+.modes-difficulty{display:flex;}
+
 
 @media (max-width: 900px){
   .right{flex-basis:100%; justify-content:flex-start}
