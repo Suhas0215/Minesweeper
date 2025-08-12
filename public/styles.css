@@ -24,7 +24,9 @@ body.theme-dark .card{background: rgba(20,28,48,.45); border-color: rgba(255,255
 .glass{box-shadow: 0 20px 60px rgba(15,23,42,.25)}
 .header{display:flex; flex-wrap:wrap; gap:12px; align-items:center; background:transparent; padding:0 0 12px 0; margin-bottom:12px}
 .left{flex:1; min-width:260px}
-.right{flex:2; min-width:260px; justify-content:flex-end}
+.right{flex:2; min-width:260px; justify-content:flex-end; flex-wrap:wrap}
+.right > .modes, .right > .stats, .right > #authArea, .right > #reset{margin-left:auto}
+@media (max-width: 1020px){ .right{justify-content:flex-start} .right > *{margin-left:0} }
 .brand-chip{display:inline-flex; align-items:center; gap:8px; background:linear-gradient(90deg, var(--panel-2), var(--panel)); padding:8px 12px; border:1px solid rgba(0,0,0,.08); border-radius:12px; font-weight:800; white-space:nowrap}
 .brand-chip .sub{font-weight:600; color:var(--muted); letter-spacing:.2px}
 .modes{display:flex; background:var(--panel-2); border:1px solid rgba(0,0,0,.08); border-radius:12px; padding:4px}
@@ -82,3 +84,9 @@ body.theme-dark .button{background:rgba(255,255,255,.08)}
 @media (max-width:620px){ .seg-btn .title{font-size:12px} #reset{padding:6px 8px; font-size:12px} }
 @media (max-width:560px){ .stats{display:none} }
 @media (max-width:600px){ .cell{width:28px; height:28px; font-size:14px} }
+.spotlight{display:flex; align-items:center; justify-content:space-between; gap:10px; padding:12px 14px; font-weight:600}
+.spotlight .meta{color:var(--muted); font-weight:500}
+
+@media (max-width: 900px){
+  .right{flex-basis:100%; justify-content:flex-start}
+}

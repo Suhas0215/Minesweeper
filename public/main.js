@@ -117,6 +117,14 @@ async function refreshLeaderboard(){
     right.textContent = `${row.timeSeconds}s`;
     li.append(left, right); ol.appendChild(li);
   });
+  const spot = el('#bestSpotlight');
+  if(spot){
+    if(items && items.length){
+      const best = items[0];
+      spot.innerHTML = `<span>Best (${mode}): <strong>${best.displayName || (best.isGuest ? 'Guest' : 'Player')}</strong></span><span class="meta">${best.timeSeconds}s</span>`;
+      spot.hidden = false;
+    } else { spot.hidden = true; }
+  }
 }
 
 function initEvents(){
