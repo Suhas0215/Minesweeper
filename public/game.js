@@ -89,15 +89,9 @@ export class Minesweeper {
         if ((x===excludeX && y===excludeY) || this.cells[y][x].mine) continue;
         this.cells[y][x].mine = true; placed++;
       }
-      for(let y=0;y<this.h;y++){
-        for(let x=0;x<this.w;x++){
-          if (this.cells[y][x].mine) { this.cells[y][x].adj = -1; continue; }
-          let c=0; this._forEachNeighbor(x,y,(nx,ny)=>{ if(this.cells[ny][nx].mine) c++; });
-          this.cells[y][x].adj = c;
-        }
-      }
+      this._recomputeAdjacencies();
       const sim = cloneBoard(this);
-      if(sim.cells[excludeY][excludeX].mine) continue;
+      if(sim.cells[excludeY][excludeX].mine) continue; // safety
       const stack=[[excludeX,excludeY]]; const visited=new Set();
       while(stack.length){
         const [cx,cy]=stack.pop(); const key=cx+','+cy; if(visited.has(key)) continue; visited.add(key);
@@ -105,7 +99,7 @@ export class Minesweeper {
         if(c.adj===0){ this._forEachNeighbor(cx,cy,(nx,ny)=>{ const n=sim.cells[ny][nx]; if(!n.revealed && !n.flagged && !n.mine) stack.push([nx,ny]); }); }
       }
       const res = solveDeterministically(sim);
-      if(res.solved){ return true; }
+      if(res.solved){ this._normalizeMineCount(excludeX, excludeY); this._recomputeAdjacencies(); return true; }
     }
     return false;
   }
@@ -118,11 +112,42 @@ export class Minesweeper {
       if ((x===excludeX && y===excludeY) || this.cells[y][x].mine) continue;
       this.cells[y][x].mine = true; placed++;
     }
+    this._normalizeMineCount(excludeX, excludeY);
+    this._recomputeAdjacencies();
+  }
+  _recomputeAdjacencies(){
     for(let y=0;y<this.h;y++){
       for(let x=0;x<this.w;x++){
         if (this.cells[y][x].mine) { this.cells[y][x].adj = -1; continue; }
         let c=0; this._forEachNeighbor(x,y,(nx,ny)=>{ if(this.cells[ny][nx].mine) c++; });
         this.cells[y][x].adj = c;
+      }
+    }
+  }
+  _normalizeMineCount(excludeX, excludeY){
+    // Ensure the board has exactly this.mines mines
+    const coords=[]; const nonCoords=[];
+    for(let y=0;y<this.h;y++) for(let x=0;x<this.w;x++){
+      if(x===excludeX && y===excludeY) continue;
+      (this.cells[y][x].mine ? coords : nonCoords).push([x,y]);
+    }
+    const current = coords.length;
+    if(current === this.mines) return;
+    if(current > this.mines){
+      // remove extras
+      const toRemove = current - this.mines;
+      for(let i=0;i<toRemove && coords.length;i++){
+        const idx = Math.floor(Math.random()*coords.length);
+        const [x,y] = coords.splice(idx,1)[0];
+        this.cells[y][x].mine = false;
+      }
+    } else {
+      // add missing
+      const toAdd = this.mines - current;
+      for(let i=0;i<toAdd && nonCoords.length;i++){
+        const idx = Math.floor(Math.random()*nonCoords.length);
+        const [x,y] = nonCoords.splice(idx,1)[0];
+        this.cells[y][x].mine = true;
       }
     }
   }
