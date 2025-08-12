@@ -49,7 +49,6 @@ export async function refreshAuthUI(){
     if(userInfo){ userInfo.hidden = false; }
     if(signinArea){ signinArea.hidden = true; }
     const nameEl = document.querySelector('#userName'); if(nameEl) nameEl.textContent = user.name || user.email || 'Signed in';
-    const pic = document.querySelector('#userPic'); if(pic){ pic.src = user.picture || ''; pic.alt = user.name || ''; }
   } else {
     if(userInfo){ userInfo.hidden = true; }
     if(signinArea){ signinArea.hidden = false; }
