@@ -23,7 +23,6 @@ function applyMode(mode){
   if(!cfg){ console.error('Unknown mode', mode); return; }
   if(document.body.classList.contains('theme-colorful')) { randomizeColorfulPalette(); }
   game.newGame(cfg);
-  document.querySelector('.header')?.scrollIntoView({block:'start'});
   document.querySelector('#lbMode').value = mode;
   const btn = document.querySelector('#modeToggle'); if(btn){
     const names = {beginner:'Beginner', intermediate:'Intermediate', expert:'Expert'};
