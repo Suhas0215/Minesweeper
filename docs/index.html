@@ -5,6 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Minesweeper — Avoid the Mines</title>
   <link rel="stylesheet" href="styles.css" />
+  <script>
+    // Optional: set this to your backend URL when hosting frontend on GitHub Pages
+    // window.API_BASE = 'https://your-backend.example.com';
+  </script>
 </head>
 <body>
   <div class="app card">
@@ -56,7 +60,6 @@
     </div>
 
     <div id="resultModal" class="modal-backdrop" role="dialog" aria-modal="true">
-
       <div class="modal">
         <h3 id="modalTitle">Game Over</h3>
         <p id="modalText">You hit a mine.</p>
@@ -81,7 +84,6 @@
     </section>
 
     <div class="footer">Left-click to reveal • Right-click to flag • Boards are generated to be solvable by logic (no guesses) • Avoid the mines</div>
-
   </div>
 
   <script type="module" src="main.js"></script>

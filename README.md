@@ -23,3 +23,12 @@ npm run dev
   - `api.js` (HTTP client)
 - `server.js` Express backend (serves static files, leaderboard API, Google auth)
 - `data/leaderboard.db` SQLite database (auto-created) 
+
+## Deploy to GitHub Pages
+
+- Use the `docs/` folder as the Pages source in your repo settings
+- Files included:
+  - `docs/index.html`, `docs/styles.css`, `docs/main.js`
+  - `.nojekyll` to disable Jekyll processing
+- If your backend runs elsewhere (Render/Fly/Heroku/etc.), set `window.API_BASE` in `docs/index.html` to its origin URL
+- If you run only static Pages without a backend, leaderboard/auth will not function (game still works offline) 
